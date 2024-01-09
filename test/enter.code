@@ -1,0 +1,299 @@
+main::[]->[Int]:{
+
+	Opc::Int;
+	
+	show: "\n<MENU PRINCIPAL>\n";
+	show: "Selecciona  una opcion";
+	show: "1. Programa piramide de asteriscos";
+	show: "2. Programa mayor y menor";
+	show: "3. Programa numeros ordenados";
+	show: "4. Programa moda, mediana y media";
+	show: "5. Salir del menu\n";
+	 
+	load:Opc;
+	
+	[$Opc != 5]@
+	{
+
+		[$Opc = 1]?
+		{
+			num::Int;
+			show: "Dame un numero";
+			load: num;
+			
+			[ i:$num \ $i>0 \ i:$i - 1 ]@
+			{
+
+				[ j:0 \ $j<$i \ j:$j + 1 ]@
+				{
+					showjump:"*";
+				}
+					show:" ";
+
+			}
+
+		}[$Opc = 2]?
+		{
+			X, n, mayor:Int;
+			Total::Int;
+			menor::Int;
+			
+			show: "Dame el total de numeros";
+			load: Total;
+			
+			X:1;
+			mayor:0;
+			menor:0;
+			
+			[$X <= $Total]@
+			{
+				show: "\nDame un numero";
+				load: n;
+				
+				[$X = 1]?
+				{
+					mayor:$n;
+					menor:$n;
+				}	
+				[$n > $mayor]|?
+				{
+					mayor:$n;
+					
+				}
+				[$n < $menor]|?
+				{
+					menor:$n;
+				}
+				
+				X +: 1;
+			}
+			
+			show: "\nNUMERO MAYOR: ", $mayor;
+			show: "\nNUMERO MENOR: ", $menor;
+			show: "";
+			
+		}[$Opc = 3]|?
+		{
+			menor::Int;
+			numero::Int;
+			temporal::Int;
+		
+			Array:Int[10];	
+			
+			show: "Ingresa 10 numeros\n";
+
+                        [ i:0 \ $i<=9 \ i:$i + 1 ]@
+                        {
+                                show: "Dame un numero";
+                                load: numero;
+                                Array:[$i,$numero];
+                        }
+			show: " ";
+                        [ j:0 \ $j<=9 \ j:$j + 1 ]@
+                        {	
+				n::Int;
+				n: $j + 1;
+				
+	                        [ t:0 \ $t<=8 \ t:$t + 1 ]@
+                                {
+					[$Array[$t] < $Array[$n]]?
+					{
+						temporal: $Array[ $n ];
+						Array[$n]:$Array[$t];
+						Array[$t]:$temporal;
+					}
+                                }            
+                        }		
+			show: " ";
+			show: "Numeros ordenados: ";
+			show: " ";
+                        [ t:9 \ $t>=0 \ t:$t - 1 ]@
+                        {
+
+                                show: $Array, $t;
+                        }
+                        
+			
+		}[$Opc = 4]|?{
+		
+			Opc2::Int;
+	
+			show: "\n***MENÚ***\n";
+			show: "Selecciona una opcion";
+			show: "1. MODA";
+			show: "2. MEDIANA";
+			show: "3. MEDIA";
+			show: "4. REGRESAR AL MENU PRINCIPAL\n"; 
+			load:Opc2;
+			
+			[$Opc2 != 4]@
+			{
+				[$Opc2 = 1]?
+				{
+					Array:Int[10];
+					Aux:Int[10];	
+					Cont::Int;
+					Posicion::Int;
+					Numero::Int;
+					Cont2::Int;
+					posMayor::Int;		
+					Num::Int;
+					NumMayor::Int;
+					O::Int;
+					O:0;
+					
+				        show: "Ingresa 10 numeros\n";
+				
+				        [ i:0 \ $i<10 \ i:$i + 1 ]@
+				        {
+				                show: "Dame un numero";
+				                load: Num;
+				                Array:[$i,$Num];
+				        }
+
+					[ Cont:0 \ $Cont<=9 \ Cont:$Cont + 1 ]@
+				        {
+				                Aux[$Cont]:0;
+				        }
+			
+				        [ Cont:0 \ $Cont<10 \ Cont:$Cont + 1 ]@
+					{                                     
+						Numero:$Array[ $Cont ];
+						Posicion:$Cont;
+						[ Cont2:$Cont \ $Cont2<=9 \ Cont2:$Cont2 + 1 ]@
+					        {
+				                     [$Array[$Cont2]=$Numero]?
+						     {
+							Aux[ $Posicion ]+: 1;
+						     }
+
+					        }
+				        }
+				        
+					NumMayor: $Aux[ $O ];
+					
+					posMayor:0;
+	
+					[ Cont:0 \ $Cont<=9 \ Cont:$Cont + 1 ]@
+				        {
+				                [$Aux[ $Cont ] > $NumMayor]?
+						{
+							posMayor:$Cont;
+							NumMayor:$Aux[$Cont];
+						}
+				        }
+				
+					show: "\nMODA: ";
+					show: $Array , $posMayor;
+				
+				}[$Opc2 = 2]|?
+				{
+					Array:Int[10];
+					Band::Int;
+					temporal::Int;
+					Band: 0;
+					n::Int;
+					Num::Int;
+					
+					show: "Ingresa 10 numeros\n";
+				
+				        [ i:0 \ $i<10 \ i:$i + 1 ]@
+				        {
+				                show: "Dame un numero: ";
+				                load: Num;
+				                Array:[$i,$Num];
+				        }
+				        
+				       [ j:0 \ $j<=9 \ j:$j + 1 ]@
+				        {	
+						n::Int;
+						n: $j + 1;
+						
+					        [ t:0 \ $t<=8 \ t:$t + 1 ]@
+				                {
+							[$Array[$t] < $Array[$n]]?
+							{
+								temporal: $Array[ $n ];
+								Array[$n]:$Array[$t];
+								Array[$t]:$temporal;
+							}
+				                }            
+				        }		
+					show: " ";
+					show: "Numeros ordenados: ";
+					show: " ";
+				        [ t:9 \ $t>=0 \ t:$t - 1 ]@
+				        {
+				                show: $Array, $t;
+				        }
+					show: "\nMEDIANA: ";
+					show: $Array,5;
+					show: "y";
+					show: $Array,4;
+	
+				}[$Opc2 = 3]|?
+				{
+					Array:Int[10];	
+					suma::Int;
+					numero::Int;
+					media::Dec;
+					media:0;
+					suma:0;
+					numero:0;
+			
+					show: "Ingresa 10 numeros\n";
+
+					[ i:0 \ $i<=9 \ i:$i + 1 ]@
+					{
+						show: "Dame un numero";
+						load: numero;
+						Array:[$i,$numero];
+					}
+					show: " ";	
+					
+					[ Cont:0 \ $Cont<=9 \ Cont:$Cont + 1 ]@
+				        {
+
+				               suma +: $Array[$Cont];
+
+				        }
+		
+					media: $suma / 10.0;
+					
+					show: "MEDIA: ",$media;
+	
+				}|{
+					show: "\nError\n"; 
+			
+				}
+				
+				show: "\n***MENÚ***\n";
+				show: "Selecciona una opcion";
+				show: "1. MODA";
+				show: "2. MEDIANA";
+				show: "3. MEDIA";
+				show: "4. REGRESAR AL MENU PRINCIPAL\n";
+				load:Opc2;
+			
+			}
+				
+			
+		}|{
+			show: "\nError\n"; 
+			
+		}
+		
+		show: "	<MENÚ>\n";
+		show: "Selecciona una opcion";
+		show: "1. Programa piramide de asteriscos";
+		show: "2. Programa mayor y menor";
+		show: "3. Programa numeros ordenados";
+		show: "4. Programa moda, mediana y media";
+		show: "5. Salir del menu\n";
+		load:Opc;
+		
+	}
+	
+	
+	answer:0;
+}

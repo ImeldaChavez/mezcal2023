@@ -1,0 +1,215 @@
+%code requires{
+#include <string>
+}
+%{
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include "SyntaxTree/Includes.hpp"
+#include <memory>
+std::unique_ptr<compiler::SyntaxTree> root;
+using namespace compiler;
+std::string result; 
+int yylex(void);
+void yyerror(char const *);
+extern char *yytext;
+%}
+
+%define api.value.type {std::string}
+
+%token NAME COLON SEMICOLON RIGHT_ARROW LEFT_CURLY_BRACE RIGHT_CURLY_BRACE LEFT_PARENTHESIS RIGHT_PARENTHESIS 
+SINGLECOMMENT MULTILINECOMMENT QUOTES DOLLAR_SIGN NTOL CHARACTERS_BLOCK EXCLAMATION_SYMBOL
+SIG_MENOR SIG_MAYOR MAS MENOS IF ELSE WHILE LOAD SHOW INT DEC BLN STR TRU FLS ANSWER ANSWER_CERO EQUAL DOBLE_EQUAL
+DOBLE_COLON LEFT_CORCH RIGHT_CORCH MY MN MYE MNE DIF INCREMENTO DECREMENTO 
+
+%start input
+
+%%
+
+input: 
+	funtion funtion_list {result = std::string("#include <stdio.h>\n #include <iostream>\n") + $1 + $2;}
+	;
+
+funtion_list:
+	funtion funtion_list {$$ = $1;}
+	|
+	%empty {$$ = ""; }
+	;
+
+funtion:
+	name DOBLE_COLON LEFT_CORCH RIGHT_BRACKERT RIGHT_ARROW LEFT_CORCH RIGHT_BRACKET statements ANSWER_CERO 
+	{	
+		if ($1 == "main")
+		{
+			$$ = std::string("int main(int argc, char *argv[]){ \n") + $5 + "\n}\n";
+		}else {
+			$$ = std::string(" void ") + "_" + $1 + "()" + "{ \n" + $5 + "\n}\n";
+			}
+	}
+	;
+
+
+statements:
+	statements statement {$$ = $1 + $2;}
+	|
+	%empty {$$ = ""; }
+	;
+
+
+statement:
+	bifurcation { $$ = $1; }
+	|
+	loops { $$ = $1; }
+	|
+	std_input SEMICOLON { $$ = $1; }
+	|
+	unitaryOperation SEMICOLON {$$ = $1;}
+	|
+	assignment SEMICOLON {$$ =$1;}
+	|
+	definition SEMICOLON {$$ = $1;}
+	|
+	std_output SEMICOLON {$$ = $1;}
+	|
+	MULTILINECOMMENT {$$ = "";}
+	|
+	SINGLECOMMENT {$$ = "";}
+	;
+
+loops:
+	LEFT_CORCH logicalComparison RIGH_CORCH WHILE LEFT_CURLY_BRACE statements RIGHT_CURLY_BRACE 
+	{ $$ = "while(" + $2 + "){\n" + $6 + "}\n"; }
+	|
+	LEFT_CORCH name COLON number_value SLASH DOLLAR_SIGN name logicalComparison number_value SLASH name COLON DOLLAR_SIGN name MAS number_value 
+	RIGHT_CORCH WHILE LEFT_CURLY_BRACE statements RIGHT_CURLY_BRACE 
+	{ $$ = "for(int" + $2 + "=" + $4 + ";" + $7 + $8 + $9 + ";" + $11 + "=" +$14 + "+" + $16 + "){\n" + $20 + "}\n"; }
+	|
+	
+	;
+
+bifurcation:
+	LEFT_CORCH logicalComparison RIGHT_CORCH IF LEFT_CURLY_BRACE statements RIGHT_CURLY_BRACE
+	{ $$ = "if(" + $2 + "){\n" + $6 + "}\n"; }
+	|
+	LEFT_CORCH logicalComparison RIGHT_CORCH IF statements
+	{ $$ = "if(" + $2 + "){\n" + $5 + "\n}\n"; }
+	ELSE LEFT_CURLY_BRACE statemens RIGHT_CURLY_BRACE 
+	{ $$ = "else{\n" + $3 + "\n}\n"; }
+	|
+	LEFT_CORCH logicalComparison RIGHT_CORCH ELSE IF LEFT_CURLY_BRACE statements RIGHT_CURLY_BRACE
+	{ $$ = "else if(" + $2 + "){\n" + $7 + "}\n"; }
+	;
+
+
+logicalComparison:
+	DOLLAR_SIGN name LEFT_BRACKET DOLLAR_SIGN name RIGHT_BRACKET logicalOperator DOLLAR_SIGN name { $$ = $2 + "[" + $5 "]" + $7 + $9;}
+	| 
+	DOLLAR_SIGN name LEFT_BRACKET DOLLAR_SING name RIGHT_BRACKET logicalOperator DOLLAR_SIGN name LEFT_BRACKET DOLLAR_SIGN name RIGHT_BRACKET 
+	{ $$ = $2 + "[" + $5 + "]" + $7 + + $9 + "[" + $12 + "]"; }
+	|
+	number_value logicalOperator number_value { $$ = $1 + $2 + $3;}
+	|
+	DOLLAR_SING name logicalOperator number_value { $$ = $2 + $3 + $4; }
+	| 
+	number_value logicalOperator DOLLAR_SIGN name { $$ = $1 + $2 + $4;}
+	|
+	DOLLAR_SIGN name logicalOperator DOLLAR_SIGN name { $$ = $2 + $3 + $5;} 
+	;
+
+
+
+
+logicalOperator:
+	EQUAL { $$ = "="; }
+	|
+	DOBLE_EQUAL { $$ = "=="; }
+	|
+	MY { $$ = ">"; }
+	|
+	MYE { $$ = ">="; }
+	|
+	MN { $$ = "<"; }
+	|
+	MNE { $$ = "<="; }
+	|
+	DIF { $$ = "!="; }
+	;
+
+std_input:
+	LOAD COLON name { $$ = "std::cin >> " + $3 + ";\n"; }
+	;
+
+unitaryOperation:
+	INCREMENTO identifiers {$$ = $2 + "++; \n";}
+	|
+	DECREMENTO identifiers {$$ = $2 + "--; \n";}
+	;
+
+
+assignment:
+	SET name DOLLAR_SIGN name { $$ = $2 + "=" + $4 + ";"; }
+	|
+	SET name number_value {$$ = $2 + "=" + $3 + "; \n";}
+	|
+	SET name TRUE {$$ = $2 + "= true;\n";}
+	|
+	SET name FALSE {$$ = $2 + "= false;\n";}
+	;
+
+
+number_value:
+	NUMBER_VALUE {$$ = std::string(yytext);}
+	;
+
+
+decimal_value:
+	DECIMAL_VALUE { $$ = std::string(yytext); }
+	;
+
+
+definition:
+	LOGICAL identifiers {$$ = "bool " + $2 + ";\n";}
+	|
+
+	NUMBER identifiers {$$ = "int " + $2 + ";\n";}
+	;
+
+identifiers:
+	identifiers ids {$$ = $1 + $2;}
+	|
+	%empty {$$ = "";}
+	;
+
+
+ids:
+	name {$$ = $1;}
+	;
+
+
+std_output:
+	SHOW NTOL DOLLAR_SIGN name {$$ = "std::cout << ((" + $4 + "==1) ? \"TRUE\" : \"FALSE\") << std::endl;";}
+	|
+	SHOW characters_block { $$ = "std::cout << " + $2 + " << std::endl;\n"; }
+	|
+	SHOW DOLLAR_SIGN name {$$ = "std::cout << " + $3 + " <<std::endl; \n";}
+	;
+
+
+characters_block:
+	CHARACTERS_BLOCK { $$ = std::string(yytext); }
+	;
+
+
+name:
+	NAME	{$$ = std::string(yytext);}
+	;
+%%
+
+//std::unique_ptr<compiler::SyntaxTree> root;
+
+void yyerror(char const *x){
+	printf("Error %s\n", x);
+	exit(1);
+}
